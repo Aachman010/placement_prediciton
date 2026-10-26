@@ -141,8 +141,6 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Ensure your `requirements.txt` includes the packages required by your application:
-
 ```text
 fastapi
 uvicorn
@@ -211,14 +209,6 @@ Actual performance metrics should be added after verifying the model evaluation 
 - Predictions are estimates and do not guarantee actual placement outcomes.
 - The application should not be used as the sole basis for real recruitment or educational decisions.
 
-## 🔮 Future Improvements
-
-- Add model evaluation metrics and visualizations.
-- Improve input validation and error handling.
-- Display prediction probabilities where appropriate.
-- Deploy the application to a cloud hosting platform.
-- Improve the frontend's usability and responsiveness.
-- Add automated testing for the API and prediction pipeline.
 
 ## 👨‍💻 Author
 
@@ -228,7 +218,7 @@ GitHub: [@Aachman010](https://github.com/Aachman010)
 
 ## 📄 License
 
-This project is intended for educational and learning purposes. Add a specific open-source license if you want to define the terms under which others may use, modify, and distribute the code.
+This project is intended for educational and learning purposes.
 
 ---
 
