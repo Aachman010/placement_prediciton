@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Student Placement Predictor</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --panel: rgba(17, 25, 46, .88);
+  --panel-soft: #121b31;
+  --line: rgba(148, 163, 184, .16);
+  --text: #eef3ff;
+  --muted: #8f9bb5;
+  --blue: #7c9cff;
+  --cyan: #68e0d0;
+  --danger: #ff8f9a;
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; }
+body {
+  margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', sans-serif; overflow-x: hidden;
+}
+.ambient { position: fixed; width: 420px; height: 420px; border-radius: 50%; filter: blur(110px); opacity: .13; pointer-events: none; z-index: -1; }
+.ambient-one { top: -160px; left: -140px; background: #4779ff; }
+.ambient-two { right: -180px; top: 400px; background: #30c8b0; opacity: .08; }
+.app-shell { width: min(1100px, calc(100% - 40px)); margin: 0 auto; }
+.topbar { height: 86px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.brand { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; }
+.brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; color: #0b1020; font: 800 14px 'Manrope', sans-serif; background: linear-gradient(135deg, var(--cyan), var(--blue)); box-shadow: 0 5px 24px #68e0d022; }
+.brand-copy { display: flex; flex-direction: column; gap: 2px; }
+.brand-copy strong { font: 800 19px 'Manrope', sans-serif; letter-spacing: -.7px; }
+.brand-copy strong span { color: var(--cyan); }
+.brand-copy small { color: #7f8ba5; font-size: 9px; letter-spacing: 1.5px; font-weight: 700; }
+.api-status { display: flex; gap: 9px; align-items: center; color: var(--muted); font-size: 12px; }
+.status-dot { width: 7px; height: 7px; background: #e5b45e; border-radius: 50%; box-shadow: 0 0 12px #e5b45e55; }
+.status-dot.online { background: #68e0a4; box-shadow: 0 0 12px #68e0a455; }
+.status-dot.offline { background: #ff7d88; box-shadow: 0 0 12px #ff7d8855; }
+.hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 50px; align-items: center; padding: 58px 0 48px; }
+.eyebrow, .step-label { color: var(--cyan); font-size: 10px; font-weight: 700; letter-spacing: 1.8px; }
+.eyebrow { display: flex; gap: 10px; align-items: center; }
+.eyebrow-line { width: 24px; height: 1px; background: var(--cyan); }
+.hero h1 { font: 800 clamp(36px, 5vw, 55px)/1.12 'Manrope', sans-serif; letter-spacing: -2.5px; margin: 18px 0 16px; }
+.hero h1 span { color: var(--blue); }
+.hero-copy > p { color: var(--muted); font-size: 14px; line-height: 1.8; max-width: 500px; margin: 0; }
+.hero-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+.hero-pills span { padding: 9px 11px; background: #ffffff06; border: 1px solid var(--line); border-radius: 7px; color: #b6c0d5; font-size: 10px; }
+.hero-pills i { font-style: normal; color: var(--cyan); margin-right: 5px; font-size: 9px; }
+.hero-art { min-height: 245px; position: relative; display: grid; place-items: center; }
+.orbit { position: absolute; border: 1px solid #7c9cff30; border-radius: 50%; transform: rotate(-25deg); }
+.orbit-a { width: 245px; height: 180px; }
+.orbit-b { width: 200px; height: 255px; transform: rotate(48deg); border-color: #68e0d022; }
+.art-core { width: 115px; height: 115px; border-radius: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; background: linear-gradient(145deg, #263b70, #182743); border: 1px solid #8ba7ff55; box-shadow: 0 0 70px #6589ff26, inset 0 1px #ffffff1c; transform: rotate(-7deg); }
+.core-symbol { font-size: 42px; line-height: 1; color: var(--cyan); }
+.art-core small { text-align: center; letter-spacing: 2px; font-size: 8px; color: #bdcaff; line-height: 1.5; }
+.float-card { position: absolute; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid #ffffff17; border-radius: 12px; background: #111b30eF; box-shadow: 0 15px 40px #0003; }
+.float-card-top { top: 22px; right: -4px; }
+.float-card-bottom { bottom: 15px; left: 0; }
+.mini-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: #68e0d018; color: var(--cyan); font-size: 20px; }
+.float-card div { display: flex; flex-direction: column; gap: 4px; }
+.float-card small { font-size: 8px; color: var(--muted); letter-spacing: 1.3px; }
+.float-card strong { font-size: 11px; font-weight: 600; }
+.art-dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 14px var(--cyan); }
+.dot-a { top: 36px; left: 30px; }.dot-b { right: 28px; bottom: 50px; background: var(--blue); }.dot-c { top: 70px; right: 70px; width: 4px; height: 4px; }
+.workspace { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 32px; box-shadow: 0 25px 90px #0002; backdrop-filter: blur(18px); }
+.section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.section-heading h2 { font: 700 25px 'Manrope', sans-serif; margin: 7px 0 0; letter-spacing: -.7px; }
+.required-note { font-size: 11px; color: var(--muted); }
+.required-note span, label span { color: var(--cyan); }
+.form-section { padding: 25px 0 27px; border-bottom: 1px solid var(--line); }
+.section-title { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; }
+.section-number { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: #7c9cff12; border: 1px solid #7c9cff2c; color: var(--blue); font-size: 11px; font-weight: 700; }
+.section-title h3 { margin: 0 0 4px; font: 700 14px 'Manrope', sans-serif; }
+.section-title p { margin: 0; color: var(--muted); font-size: 11px; }
+.fields-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 18px; }
+.field { min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+.field label { font-size: 11px; color: #b8c3d9; font-weight: 600; }
+input, select { width: 100%; height: 45px; padding: 0 13px; border-radius: 8px; border: 1px solid #ffffff18; background: #0c1426; color: var(--text); outline: none; font: 500 12px 'DM Sans', sans-serif; transition: border-color .18s, box-shadow .18s; }
+select { cursor: pointer; }
+input::placeholder { color: #596782; }
+input:focus, select:focus { border-color: #7c9cffaa; box-shadow: 0 0 0 3px #7c9cff12; }
+.input-wrap { position: relative; }
+.input-wrap input { padding-right: 68px; }
+.input-wrap > span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #65728e; font-size: 10px; pointer-events: none; }
+.field-hint { color: #6f7e9b; font-size: 9px; line-height: 1.5; margin-top: -2px; }
+.form-actions { padding-top: 25px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.form-actions p { color: #8491ab; font-size: 10px; line-height: 1.6; margin: 0; }
+.lock-icon { color: var(--cyan); font-size: 16px; margin-right: 5px; }
+button { font-family: inherit; }
+#predictBtn { min-width: 220px; min-height: 48px; border: 0; border-radius: 9px; padding: 0 16px 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 22px; color: #0b1020; background: linear-gradient(110deg, var(--cyan), #9ce8e0); font-size: 12px; font-weight: 700; cursor: pointer; transition: transform .18s, filter .18s; }
+#predictBtn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+#predictBtn:disabled { opacity: .65; cursor: wait; transform: none; }
+.button-arrow { font-size: 20px; font-weight: 400; }
+.result-panel { margin-top: 24px; border: 1px solid #68e0d044; border-radius: 13px; padding: 20px; display: flex; align-items: center; gap: 16px; background: #68e0d009; }
+.result-panel[hidden], .error-panel[hidden] { display: none; }
+.result-panel.not-placed { border-color: #e5b45e55; background: #e5b45e08; }
+.result-icon { flex: 0 0 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: #68e0d01b; color: var(--cyan); font-size: 22px; }
+.not-placed .result-icon { background: #e5b45e18; color: #e5b45e; }
+.result-copy { flex: 1; min-width: 0; }
+.result-copy h2 { margin: 5px 0; font: 700 19px 'Manrope', sans-serif; }
+.result-copy p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.secondary-button { border: 1px solid var(--line); background: #ffffff08; color: var(--text); padding: 11px 14px; border-radius: 8px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.secondary-button:hover { background: #ffffff12; }
+.error-panel { margin-top: 20px; padding: 15px; border-radius: 9px; border: 1px solid #ff8f9a55; background: #ff8f9a0d; color: #ffb8bf; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.footer { display: flex; justify-content: space-between; gap: 15px; padding: 23px 2px 35px; color: #68758f; font-size: 10px; }
+.footer-separator { color: var(--cyan); margin: 0 5px; }
+@media (max-width: 800px) {
+  .hero { grid-template-columns: 1fr; gap: 5px; padding-top: 42px; }
+  .hero-art { min-height: 220px; max-width: 420px; width: 100%; margin: 0 auto; }
+  .fields-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .app-shell { width: min(100% - 24px, 1100px); }
+  .topbar { height: 72px; }
+  .api-status { font-size: 10px; }
+  .hero { padding: 36px 0 30px; }
+  .hero h1 { letter-spacing: -1.7px; }
+  .hero-pills { gap: 6px; }
+  .hero-pills span { font-size: 9px; }
+  .workspace { padding: 20px 16px; border-radius: 15px; }
+  .section-heading { align-items: flex-start; }
+  .section-heading h2 { font-size: 22px; }
+  .fields-grid { grid-template-columns: 1fr; }
+  .form-actions { align-items: stretch; flex-direction: column; }
+  #predictBtn { width: 100%; }
+  .result-panel { align-items: flex-start; flex-wrap: wrap; }
+  .result-copy { min-width: calc(100% - 60px); }
+  .secondary-button { margin-left: 58px; }
+  .footer { flex-direction: column; line-height: 1.6; }
+}
+
+  </style>
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Student Placement Predictor home">
+        <span class="brand-mark">SP</span>
+        <span class="brand-copy">
+          <strong>Student<span>IQ</span></strong>
+          <small>PLACEMENT INTELLIGENCE</small>
+        </span>
+      </a>
+      <div class="api-status"><span class="status-dot"></span><span id="apiStatus">API status unknown</span></div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> MACHINE LEARNING DASHBOARD</div>
+        <h1>Predict your next<br /><span>career milestone.</span></h1>
+        <p>Enter the student's academic and lifestyle details to get a placement prediction from your trained ML model.</p>
+        <div class="hero-pills">
+          <span><i>01</i> Student profile</span>
+          <span><i>02</i> Model inference</span>
+          <span><i>03</i> Prediction result</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="art-core"><span class="core-symbol">↗</span><small>MODEL<br/>INSIGHT</small></div>
+        <div class="float-card float-card-top"><span class="mini-icon">⌁</span><div><small>ANALYSIS</small><strong>Student profile</strong></div></div>
+        <div class="float-card float-card-bottom"><span class="mini-icon">✳</span><div><small>OUTPUT</small><strong>Prediction ready</strong></div></div>
+        <span class="art-dot dot-a"></span><span class="art-dot dot-b"></span><span class="art-dot dot-c"></span>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="section-heading">
+        <div><span class="step-label">PREDICTION FORM</span><h2>Student details</h2></div>
+        <span class="required-note"><span>*</span> Required fields</span>
+      </div>
+
+      <form id="predictionForm" novalidate>
+        <section class="form-section">
+          <div class="section-title"><span class="section-number">01</span><div><h3>Personal profile</h3><p>Basic student information</p></div></div>
+          <div class="fields-grid">
+            <div class="field">
+              <label for="gender">Gender <span>*</span></label>
+              <select id="gender" name="gender" required>
+                <option value="Male">Male</option><option value="Female">Female</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="branch">Branch <span>*</span></label>
+              <select id="branch" name="branch" required>
+                <option value="CSE">CSE</option>
+                <option value="AIML">AIML</option>
+                <option value="IT">IT</option>
+                <option value="ECE">ECE</option>
+                <option value="CIVIL">CIVIL</option>
+                <option value="MECHANICAL">MECHANICAL</option>
+                <option value="COMMERCE">COMMERCE</option>
+              </select>
+              <small class="field-hint">Make sure this value matches a branch category used during training.</small>
+            </div>
+            <div class="field">
+              <label for="extracurricular">Extracurricular activities <span>*</span></label>
+              <select id="extracurricular" name="extracurricular" required>
+                <option value="Yes">Yes</option><option value="No">No</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-title"><span class="section-number">02</span><div><h3>Academic performance</h3><p>Study habits and academic scores</p></div></div>
+          <div class="fields-grid">
+            <div class="field"><label for="study_hours">Study hours <span>*</span></label><div class="input-wrap"><input id="study_hours" name="study_hours" type="number" min="0" max="24" step="any" placeholder="e.g. 5" required /><span>hrs/day</span></div></div>
+            <div class="field"><label for="attendance">Attendance <span>*</span></label><div class="input-wrap"><input id="attendance" name="attendance" type="number" min="0" max="100" step="any" placeholder="e.g. 85" required /><span>%</span></div></div>
+            <div class="field"><label for="assignments_completed">Assignments completed <span>*</span></label><input id="assignments_completed" name="assignments_completed" type="number" min="0" step="any" placeholder="e.g. 15" required /></div>
+            <div class="field"><label for="previous_score">Previous score <span>*</span></label><div class="input-wrap"><input id="previous_score" name="previous_score" type="number" min="0" max="100" step="any" placeholder="e.g. 75" required /><span>/ 100</span></div></div>
+            <div class="field"><label for="exam_score">Exam score <span>*</span></label><div class="input-wrap"><input id="exam_score" name="exam_score" type="number" min="0" max="100" step="any" placeholder="e.g. 80" required /><span>/ 100</span></div></div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-title"><span class="section-number">03</span><div><h3>Lifestyle details</h3><p>Daily routine indicators</p></div></div>
+          <div class="fields-grid">
+            <div class="field"><label for="sleep_hours">Sleep hours <span>*</span></label><div class="input-wrap"><input id="sleep_hours" name="sleep_hours" type="number" min="0" max="24" step="any" placeholder="e.g. 7" required /><span>hrs/day</span></div></div>
+            <div class="field"><label for="internet_usage">Internet usage <span>*</span></label><div class="input-wrap"><input id="internet_usage" name="internet_usage" type="number" min="0" max="24" step="any" placeholder="e.g. 4" required /><span>hrs/day</span></div></div>
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <p><span class="lock-icon">⌑</span> Your inputs are sent to your local FastAPI model.</p>
+          <button type="submit" id="predictBtn"><span class="button-text">Generate prediction</span><span class="button-arrow">↗</span></button>
+        </div>
+      </form>
+
+      <section id="resultPanel" class="result-panel" aria-live="polite" hidden>
+        <div class="result-icon" id="resultIcon">✓</div>
+        <div class="result-copy"><span class="step-label">MODEL OUTPUT</span><h2 id="resultTitle">Prediction result</h2><p id="resultMessage"></p></div>
+        <button type="button" id="resetBtn" class="secondary-button">Edit details</button>
+      </section>
+      <div id="errorPanel" class="error-panel" role="alert" hidden></div>
+    </section>
+
+    <footer class="footer"><span>StudentIQ <span class="footer-separator">/</span> ML project interface</span><span>Predictions are estimates, not placement guarantees.</span></footer>
+  </main>
+  <script>
+// Update this URL if your FastAPI backend runs on another host or port.
+const API_URL = "http://127.0.0.1:8000/predict";
+const HEALTH_URL = "http://127.0.0.1:8000/";
+
+const form = document.getElementById("predictionForm");
+const predictBtn = document.getElementById("predictBtn");
+const buttonText = predictBtn.querySelector(".button-text");
+const resultPanel = document.getElementById("resultPanel");
+const resultTitle = document.getElementById("resultTitle");
+const resultMessage = document.getElementById("resultMessage");
+const resultIcon = document.getElementById("resultIcon");
+const errorPanel = document.getElementById("errorPanel");
+const resetBtn = document.getElementById("resetBtn");
+const apiStatus = document.getElementById("apiStatus");
+const statusDot = document.querySelector(".status-dot");
+
+function setApiStatus(state, label) {
+  apiStatus.textContent = label;
+  statusDot.className = "status-dot " + state;
+}
+
+async function checkApiStatus() {
+  try {
+    const response = await fetch(HEALTH_URL, { method: "GET" });
+    if (!response.ok) throw new Error("API unavailable");
+    setApiStatus("online", "Backend connected");
+  } catch {
+    setApiStatus("offline", "Backend not reachable");
+  }
+}
+
+function getNumber(id) {
+  return Number(document.getElementById(id).value);
+}
+
+function validateForm() {
+  if (!form.reportValidity()) return false;
+
+  const limits = [
+    ["study_hours", 0, 24, "Study hours must be between 0 and 24."],
+    ["attendance", 0, 100, "Attendance must be between 0 and 100."],
+    ["sleep_hours", 0, 24, "Sleep hours must be between 0 and 24."],
+    ["internet_usage", 0, 24, "Internet usage must be between 0 and 24."],
+    ["previous_score", 0, 100, "Previous score must be between 0 and 100."],
+    ["exam_score", 0, 100, "Exam score must be between 0 and 100."]
+  ];
+
+  for (const [id, min, max, message] of limits) {
+    const value = getNumber(id);
+    if (!Number.isFinite(value) || value < min || value > max) {
+      showError(message);
+      document.getElementById(id).focus();
+      return false;
+    }
+  }
+
+  if (getNumber("assignments_completed") < 0) {
+    showError("Assignments completed cannot be negative.");
+    document.getElementById("assignments_completed").focus();
+    return false;
+  }
+
+  return true;
+}
+
+function showError(message) {
+  errorPanel.textContent = message;
+  errorPanel.hidden = false;
+  resultPanel.hidden = true;
+}
+
+function clearMessages() {
+  errorPanel.hidden = true;
+  resultPanel.hidden = true;
+  errorPanel.textContent = "";
+}
+
+function makePayload() {
+  return {
+    gender: document.getElementById("gender").value,
+    study_hours: getNumber("study_hours"),
+    attendance: getNumber("attendance"),
+    sleep_hours: getNumber("sleep_hours"),
+    internet_usage: getNumber("internet_usage"),
+    assignments_completed: getNumber("assignments_completed"),
+    previous_score: getNumber("previous_score"),
+    extracurricular: document.getElementById("extracurricular").value,
+    exam_score: getNumber("exam_score"),
+    branch: document.getElementById("branch").value.trim().toUpperCase()
+  };
+}
+
+function showPrediction(prediction) {
+  resultPanel.hidden = false;
+  errorPanel.hidden = true;
+
+  if (prediction === "Placed") {
+    resultPanel.className = "result-panel";
+    resultIcon.textContent = "✓";
+    resultTitle.textContent = "Placement predicted";
+    resultMessage.textContent =
+      "The model returned: Placed. This is a model prediction, not a guarantee.";
+  } else if (prediction === "Not Placed") {
+    resultPanel.className = "result-panel not-placed";
+    resultIcon.textContent = "!";
+    resultTitle.textContent = "Placement not predicted";
+    resultMessage.textContent =
+      "The model returned: Not Placed. This is an estimate based on the model's training.";
+  } else {
+    throw new Error("Unexpected response from API. Expected 'Placed' or 'Not Placed'.");
+  }
+
+  resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  clearMessages();
+
+  if (!validateForm()) return;
+
+  predictBtn.disabled = true;
+  buttonText.textContent = "Generating prediction…";
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(makePayload())
+    });
+
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const detail = body.detail
+        ? (typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail))
+        : `HTTP ${response.status}`;
+      throw new Error(detail);
+    }
+
+    if (!body || typeof body.prediction !== "string") {
+      throw new Error("API response is missing the 'prediction' field.");
+    }
+
+    showPrediction(body.prediction);
+    setApiStatus("online", "Backend connected");
+  } catch (error) {
+    setApiStatus("offline", "Backend connection issue");
+
+    let message = error.message || "Unknown error";
+    if (error instanceof TypeError) {
+      message =
+        "Could not connect to FastAPI. Start the backend, verify API_URL, and configure CORS for your frontend origin.";
+    }
+    showError(message);
+  } finally {
+    predictBtn.disabled = false;
+    buttonText.textContent = "Generate prediction";
+  }
+});
+
+resetBtn.addEventListener("click", () => {
+  clearMessages();
+  document.getElementById("branch").focus();
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+checkApiStatus();
+
+  </script>
+</body>
+</html>
